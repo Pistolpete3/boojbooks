@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Book;
+use App\ReadingList;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -39,7 +40,7 @@ class FetchBooks extends Command
      *
      * @var string
      */
-    protected $signature = 'fetch_books {--dev}';
+    protected $signature = 'fetch-books {--dev}';
 
     /**
      * The console command description.
@@ -70,21 +71,23 @@ class FetchBooks extends Command
 
         // First request to gather all list names
         if ($this->option('dev')) {
-            $listSlugs = ['hardcover-nonfiction'];
+            $lists = [
+                'list_name_encoded' => 'hardcover-nonfiction',
+                'display_name' => 'Hardcover Nonfiction',
+            ];
         } else {
-            $listSlugs = $this->fetchListSlugs($client, $this->buildApiUrl('lists/names.json'));
+            $lists = $this->fetchLists($client, $this->buildApiUrl('lists/names.json'));
         }
 
-
         // Setup progress bar
-        $bar = $this->output->createProgressBar(count($listSlugs));
+        $bar = $this->output->createProgressBar(count($lists));
         $bar->setFormat("%message%\n %current%/%max% [%bar%] %percent:3s%%");
         $bar->start();
 
         // Loop through lists to populate books
-        foreach ($listSlugs as $listSlug) {
-            $bar->setMessage('Importing List: ' . $listSlug);
-            $this->attemptApiRequest($client, $bar, $listSlug);
+        foreach ($lists as $index => $list) {
+            $bar->setMessage('Importing List: ' . $list['display_name']);
+            $this->attemptApiRequest($client, $bar, $list, $index);
         }
     }
 
@@ -93,15 +96,26 @@ class FetchBooks extends Command
      *
      * @param Client $client
      * @param ProgressBar $bar
-     * @param string $listSlug
+     * @param array $list
+     * @param int $index
      */
-    private function attemptApiRequest(Client $client, ProgressBar $bar, string $listSlug)
+    private function attemptApiRequest(Client $client, ProgressBar $bar, array $list, int $index)
     {
+        // Create sample Lists
+        if ($index < 6) {
+            $readingList = ReadingList::firstOrCreate(['name' => $list['display_name']]);
+        } else {
+            $readingList = null;
+        }
+
+        // Generate URL
+        $url = $this->buildApiUrl('lists/current/' . $list['list_name_encoded']);
+
         // Perform API request
-        $bookData = $this->gatherBookDataFromRequest($client, $this->buildApiUrl('lists/current/' . $listSlug));
+        $bookData = $this->gatherBookDataFromRequest($client, $url, $readingList);
 
         // Generate books
-        $this->generateBooksFromData($bookData);
+        $this->generateBooksFromData($bookData, $readingList);
 
         // Advance progress bar
         $bar->advance();
@@ -130,13 +144,11 @@ class FetchBooks extends Command
      * @param string $url
      * @return array
      */
-    private function fetchListSlugs(Client $client, string $url): array
+    private function fetchLists(Client $client, string $url): array
     {
         $response = $client->request('GET', $url);
 
-        $lists = json_decode($response->getBody()->getContents(), true);
-
-        return array_column($lists['results'], 'list_name_encoded');
+        return json_decode($response->getBody()->getContents(), true)['results'];
     }
 
     /**
@@ -154,16 +166,23 @@ class FetchBooks extends Command
     }
 
     /**
-     * Generate book models from book data set ISBNs if present
+     * Generate book models from book data
      *
      * @param array $bookData
+     * @param ReadingList $readingList
      */
-    private function generateBooksFromData(array $bookData)
+    private function generateBooksFromData(array $bookData, ReadingList $readingList = null)
     {
-        array_walk($bookData, function (array $book) {
+        array_walk($bookData, function (array $book) use ($readingList) {
             $bookAttributes = collect($book)->only($this->apiBookAttributes)->toArray();
 
-            Book::firstOrCreate($bookAttributes);
+            // Create the book
+            $book = Book::firstOrCreate($bookAttributes);
+
+            // Attach the book to the reading list if present
+            if ($readingList) {
+                $readingList->books()->attach($book);
+            }
         });
     }
 }

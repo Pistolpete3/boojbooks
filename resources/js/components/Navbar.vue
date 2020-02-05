@@ -11,6 +11,8 @@
                 <router-link :to="{ name: 'lists.index' }" class="nav-item nav-link">Lists</router-link>
             </div>
             <div class="navbar-nav ml-auto">
+                <a v-if="loggedIn" href="https://documenter.getpostman.com/view/4437090/SWTG5vKU?version=latest" class="nav-item nav-link">API Docs</a>
+                <a v-if="loggedIn" href="https://github.com/Pistolpete3/boojbooks" class="nav-item nav-link">Github</a>
                 <router-link v-if="!loggedIn" :to="{ name: 'login' }" class="nav-item nav-link">Login</router-link>
                 <router-link v-if="loggedIn" :to="{ name: 'logout' }" class="nav-item nav-link">Logout</router-link>
             </div>

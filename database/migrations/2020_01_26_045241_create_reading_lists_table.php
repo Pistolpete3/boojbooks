@@ -16,7 +16,7 @@ class CreateReadingListsTable extends Migration
         Schema::create('reading_lists', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->bigInteger('user_id');
+            $table->bigInteger('user_id')->nullable();
             $table->timestamps();
         });
     }

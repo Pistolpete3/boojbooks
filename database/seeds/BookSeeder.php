@@ -11,6 +11,6 @@ class BookSeeder extends Seeder
      */
     public function run()
     {
-        \Illuminate\Support\Facades\Artisan::call('fetch_books --dev');
+        \Illuminate\Support\Facades\Artisan::call('fetch-books');
     }
 }

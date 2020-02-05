@@ -85,9 +85,10 @@ export const store = new Vuex.Store({
                     password: credentials.password
                 }).then(response => {
                     const token = response.data.access_token;
-
-                    localStorage.setItem('access_token', token);
-                    context.commit('setToken', token);
+                    if (token !== 'undefined') {
+                        localStorage.setItem('access_token', token);
+                        context.commit('setToken', token);
+                    }
                     resolve(response);
                 }).then(error => {
                     console.log(error);
@@ -159,7 +160,6 @@ export const store = new Vuex.Store({
                 axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.token
                 axios.post('lists', context.state.list)
                     .then(response => {
-                        console.log(response);
                         resolve(response);
                 }).then(error => {
                     console.log(error);

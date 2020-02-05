@@ -67,7 +67,7 @@
             createList() {
                 this.$store.dispatch('createList')
                     .then(() => {
-                        this.$router.push({name: 'lists'})
+                        this.$router.push({name: 'lists.index'})
                     })
             }
         },

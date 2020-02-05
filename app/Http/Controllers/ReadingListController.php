@@ -22,10 +22,6 @@ class ReadingListController extends Controller
      */
     public function index()
     {
-        //@todo implement api auth
-        if ($user = Auth::user()) {
-            return ReadingListResource::collection($user->readingLists);
-        }
         return ReadingListResource::collection(ReadingList::all());
     }
 

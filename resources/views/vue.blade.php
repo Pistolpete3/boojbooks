@@ -6,8 +6,6 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <script>window.Laravel = { csrfToken: 'csrf_token()'}</script>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-{{--        <link rel="shortcut icon" type="image/png" href="http://miathereader.com/wp-content/uploads/2017/01/cropped-favicon.png"/>--}}
-        <link rel="shortcut icon" type="image/png" href="http://www.booj.com/img/booj-flame.png"/>
         <title>Booj Reading List</title>
     </head>
     <body>

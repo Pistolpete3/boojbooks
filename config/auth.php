@@ -117,8 +117,8 @@ return [
      * Passport Configuration
      */
     'passport' => [
-        'token_uri' => env('PASSPORT_TOKEN_URI'),
-        'client_id' => env('PASSPORT_CLIENT_ID'),
+        'token_uri' => env('PASSPORT_TOKEN_URI', env('APP_URL') . '/oauth/token'),
+        'client_id' => env('PASSPORT_CLIENT_ID', 2),
         'client_secret' => env('PASSPORT_CLIENT_SECRET'),
     ]
 ];
